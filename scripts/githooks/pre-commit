@@ -8,7 +8,10 @@ if [ ! -v "IN_NIX_SHELL" ]; then
   system="x86_64-linux"
 
   git stash --quiet --keep-index
-  nix build --no-link ".#checks.$system.fmt-lint" || (git stash pop --quiet && exit 1)
+  nix build \
+    --no-link \
+    --no-update-lock-file \
+    ".#checks.$system.fmt-lint" || (git stash pop --quiet && exit 1)
   git stash pop --quiet
   
   exit 0
