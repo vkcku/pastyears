@@ -19,6 +19,11 @@ command = "keep-sorted"
 includes = ["*"]
 priority = -1
 
+[formatter.go-fmt]
+command = "sh"
+options = ["./scripts/golangci-lint.sh"]
+includes = ["*.go"]
+
 [formatter.md-fmt]
 command = "mdformat"
 options = ["--number", "--wrap", "80"]

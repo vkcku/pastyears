@@ -33,6 +33,7 @@
           # keep-sorted start
           gopls
           nil
+          yaml-language-server
           # keep-sorted end
         ];
         # keep-sorted end

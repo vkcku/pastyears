@@ -1,0 +1,25 @@
+version: "2"
+
+formatters:
+  enable:
+    - goimports
+    - golines
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/vkcku/pastyears
+    golines:
+      # keep-sorted start
+      chain-split-dots: true
+      max-len: 80
+      reformat-tags: true
+      shorten-comments: true
+      tab-len: 4
+      # keep-sorted end
+
+linters:
+  default: all
+  disable:
+    # keep-sorted start
+    - wsl
+    # keep-sorted end
