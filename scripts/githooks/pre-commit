@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -eu
+
+system="x86_64-linux"
+
+echo "info: running pre-commit hooks"
+
+git stash --quiet --keep-index
+nix build ".#checks.$system.fmt-lint" || (git stash pop --quiet && exit 1)
+git stash pop --quiet
