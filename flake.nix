@@ -6,7 +6,7 @@
   };
 
   outputs =
-    { nixpkgs, ... }:
+    { self, nixpkgs, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
@@ -25,8 +25,23 @@
       ];
     in
     {
+      packages."${system}" = {
+        default = pkgs.buildGoModule {
+          name = "pastyears-webserver";
+          src = ./.;
+          subPackages = [ "cmd/webserver" ];
+          vendorHash = null;
+        };
+      };
+
       devShells.${system}.default = pkgs.mkShell {
-        buildInputs = formatters;
+        buildInputs =
+          with pkgs;
+          [
+            go
+            gopls
+          ]
+          ++ formatters;
       };
 
       checks."${system}" =
@@ -47,18 +62,21 @@
                 dontBuild = true;
               } (mkScript check.script)
             ) checks;
-        in
-        mkChecks {
-          fmt-lint = {
-            buildInputs = [ formatters ];
-            script = ''
-              treefmt \
-                --config-file "$src/treefmt.toml" \
-                --ci \
-                --tree-root "$src" \
-                --walk filesystem
-            '';
+
+          checks = mkChecks {
+            fmt-lint = {
+              buildInputs = [ formatters ];
+              script = ''
+                treefmt \
+                  --config-file "$src/treefmt.toml" \
+                  --ci \
+                  --tree-root "$src" \
+                  --walk filesystem
+              '';
+            };
+
           };
-        };
+        in
+        checks // { build = self.packages."${system}".default; };
     };
 }
