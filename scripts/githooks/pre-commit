@@ -7,6 +7,8 @@ echo "info: running pre-commit hooks"
 if [ ! -v "IN_NIX_SHELL" ]; then
   system="x86_64-linux"
 
+  # No need for `--include-untracked` here since `nix build` will not copy
+  # over untracked files.
   git stash --quiet --keep-index
   nix build \
     --no-link \
@@ -20,6 +22,6 @@ fi
 # Get all files that have changed but not been deleted.
 changed_files="$(git diff --diff-filter "d" --name-only --cached)"
 
-git stash --quiet --keep-index
+git stash --quiet --keep-index --include-untracked
 treefmt --ci --quiet $changed_files || (git stash pop --quiet && exit 1)
 git stash pop --quiet
