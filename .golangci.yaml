@@ -22,6 +22,7 @@ linters:
   disable:
     # keep-sorted start
     - depguard
+    - mnd
     - wsl
     # keep-sorted end
   settings:
