@@ -2,10 +2,21 @@
 
 set -eu
 
-system="x86_64-linux"
-
 echo "info: running pre-commit hooks"
 
+if [ ! -v "IN_NIX_SHELL" ]; then
+  system="x86_64-linux"
+
+  git stash --quiet --keep-index
+  nix build ".#checks.$system.fmt-lint" || (git stash pop --quiet && exit 1)
+  git stash pop --quiet
+  
+  exit 0
+fi
+
+# Get all files that have changed but not been deleted.
+changed_files="$(git diff --diff-filter "d" --name-only --cached)"
+
 git stash --quiet --keep-index
-nix build ".#checks.$system.fmt-lint" || (git stash pop --quiet && exit 1)
+treefmt --ci --quiet $changed_files || (git stash pop --quiet && exit 1)
 git stash pop --quiet
