@@ -29,7 +29,12 @@
           # keep-sorted end
         ];
 
-        lsps = with pkgs; [ gopls ];
+        lsps = with pkgs; [
+          # keep-sorted start
+          gopls
+          nil
+          # keep-sorted end
+        ];
         # keep-sorted end
       };
     in
