@@ -12,17 +12,26 @@
       lib = nixpkgs.lib;
       pkgs = nixpkgs.legacyPackages.${system};
 
-      formatters = with pkgs; [
-        # keep-sorted start
-        keep-sorted
-        nixfmt-rfc-style
-        python313Packages.mdformat
-        python313Packages.mdformat-gfm
-        taplo
-        treefmt
-        typos
+      buildInputs = {
+        # keep-sorted start block=yes newline_separated=yes
+        core = with pkgs; [ go ];
+
+        formatters = with pkgs; [
+          # keep-sorted start
+          golangci-lint
+          keep-sorted
+          nixfmt-rfc-style
+          python313Packages.mdformat
+          python313Packages.mdformat-gfm
+          taplo
+          treefmt
+          typos
+          # keep-sorted end
+        ];
+
+        lsps = with pkgs; [ gopls ];
         # keep-sorted end
-      ];
+      };
     in
     {
       packages."${system}" = {
@@ -35,13 +44,7 @@
       };
 
       devShells.${system}.default = pkgs.mkShell {
-        buildInputs =
-          with pkgs;
-          [
-            go
-            gopls
-          ]
-          ++ formatters;
+        buildInputs = lib.lists.flatten (builtins.attrValues buildInputs);
       };
 
       checks."${system}" =
@@ -65,7 +68,7 @@
 
           checks = mkChecks {
             fmt-lint = {
-              buildInputs = [ formatters ];
+              buildInputs = [ buildInputs.formatters ];
               script = ''
                 treefmt \
                   --config-file "$src/treefmt.toml" \
