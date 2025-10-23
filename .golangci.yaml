@@ -23,3 +23,10 @@ linters:
     # keep-sorted start
     - wsl
     # keep-sorted end
+  settings:
+    staticcheck:
+      checks:
+        - "all"
+        # Allow comparisons against boolean constants.
+        # `condition == false` is far more readable than `if !condition`.
+        - "-S1002"
