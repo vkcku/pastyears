@@ -45,7 +45,8 @@
           name = "pastyears-webserver";
           src = ./.;
           subPackages = [ "cmd/webserver" ];
-          vendorHash = null;
+          # vendorHash = lib.fakeHash;
+          vendorHash = "sha256-uPqabZgQGQulf+F3BvMLhv4O0h5jOq12F7K60u5xjtA=";
         };
       };
 
