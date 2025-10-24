@@ -54,39 +54,30 @@
         buildInputs = lib.lists.flatten (builtins.attrValues buildInputs);
       };
 
-      checks."${system}" =
-        let
-          /**
-            Ensure the `$out` directory is created since the derivation will be
-            marked as failed otherwise.
-          */
-          mkScript = script: script + "\n" + "mkdir $out";
-
-          mkChecks =
-            checks:
-            lib.attrsets.mapAttrs (
-              name: check:
-              pkgs.runCommandLocal name {
-                src = ./.;
-                nativeBuildInputs = check.buildInputs;
-                dontBuild = true;
-              } (mkScript check.script)
-            ) checks;
-
-          checks = mkChecks {
-            fmt-lint = {
-              buildInputs = [ buildInputs.formatters ];
-              script = ''
-                treefmt \
-                  --config-file "$src/treefmt.toml" \
-                  --ci \
-                  --tree-root "$src" \
-                  --walk filesystem
-              '';
-            };
-
-          };
-        in
-        checks // { build = self.packages."${system}".default; };
+      checks."${system}" = {
+        build = self.packages."${system}".default;
+        fmt-lint = self.packages."${system}".default.overrideAttrs (old: {
+          nativeBuildInputs = old.nativeBuildInputs ++ buildInputs.formatters;
+          buildPhase = ''
+            # `golangci-lint` and `go` creates some cache directories using
+            # `os.UserCacheDir` which takes the value from `$XDG_CACHE_HOME` or
+            # sets the value as `$HOME/.cache` if `XDG_CACHE_HOME` is not found.
+            # In the nix build, the $HOME directory is read-only so they both
+            # fail to create files within that cache directory.
+            #
+            # REFERENCE: https://github.com/NixOS/nixpkgs/issues/202614
+            # More specifically, this comment:
+            # https://github.com/NixOS/nixpkgs/issues/202614#issuecomment-1326152971
+            XDG_CACHE_HOME=$TMPDIR treefmt \
+              --ci \
+              --walk filesystem \
+          '';
+          doCheck = false;
+          installPhase = ''
+            touch $out
+          '';
+          fixupPhase = '''';
+        });
+      };
     };
 }
