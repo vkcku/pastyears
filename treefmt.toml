@@ -5,6 +5,11 @@ walk = "git"
 excludes = [
   # keep-sorted start
   "flake.lock",
+  # The way the nix builds work is that a derivation is by vendoring the go
+  # dependencies. This means that in the lint check ran via `nix flake check` the
+  # vendor directory would be present and be processed by `treefmt` which is
+  # unnecessary.
+  "vendor/*",
   # keep-sorted end
 ]
 
