@@ -56,7 +56,7 @@
 
       checks."${system}" = {
         build = self.packages."${system}".default;
-        fmt-lint = self.packages."${system}".default.overrideAttrs (old: {
+        lint = self.packages."${system}".default.overrideAttrs (old: {
           nativeBuildInputs = old.nativeBuildInputs ++ buildInputs.formatters;
           buildPhase = ''
             # `golangci-lint` and `go` creates some cache directories using

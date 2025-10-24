@@ -13,7 +13,7 @@ if [ ! -v "IN_NIX_SHELL" ]; then
   nix build \
     --no-link \
     --no-update-lock-file \
-    ".#checks.$system.fmt-lint" || (git stash pop --quiet && exit 1)
+    ".#checks.$system.lint" || (git stash pop --quiet && exit 1)
   git stash pop --quiet
   
   exit 0
