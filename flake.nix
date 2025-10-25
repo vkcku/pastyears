@@ -93,6 +93,7 @@
         });
 
         lint = self.packages."${system}".default.overrideAttrs (old: {
+          name = "lint";
           nativeBuildInputs =
             old.nativeBuildInputs ++ buildInputs.formatters ++ [ self.packages.${system}.cli ];
           buildPhase = ''
