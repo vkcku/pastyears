@@ -14,7 +14,10 @@
 
       buildInputs = {
         # keep-sorted start block=yes newline_separated=yes
-        core = with pkgs; [ go ];
+        core = with pkgs; [
+          go
+          postgresql_18
+        ];
 
         formatters = with pkgs; [
           # keep-sorted start
