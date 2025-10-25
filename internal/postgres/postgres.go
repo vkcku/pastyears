@@ -1,5 +1,7 @@
 // Package postgres manages dev/test instances of Postgres. This requires that
 // postgres binaries `pgctl`, `initdb` etc. to be in PATH.
+//
+//nolint:gosec
 package postgres
 
 import (
@@ -12,11 +14,17 @@ import (
 	"path/filepath"
 )
 
+// PostgresStatus specifies the status of the postgres instance.
 type PostgresStatus uint8
 
 const (
+	// Running means the Postgres instance is running.
 	Running PostgresStatus = iota
+
+	// NotRunning means a Postgres instance exists, but it is not running.
 	NotRunning
+
+	// NoInstance means there is no Postgres instance.
 	NoInstance
 )
 
@@ -55,7 +63,7 @@ func New(
 		socketDir = pgDir
 	)
 
-	u, err := user.Current()
+	u, err := user.Current() //nolint:varnamelen
 	if err != nil {
 		return fmt.Errorf("postgres: failed to get current user: %w", err)
 	}
@@ -81,7 +89,7 @@ func New(
 	if err != nil {
 		return fmt.Errorf("postgres: failed to open postgresql.conf: %w", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	_, err = fmt.Fprintf(file, "port = %d\n", port)
 	if err != nil {
@@ -175,6 +183,8 @@ func Start(ctx context.Context, pgDir string) error {
 		return nil
 	case NoInstance:
 		return errNoInstance
+	case NotRunning:
+		// no-op
 	}
 
 	var (
