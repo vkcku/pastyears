@@ -142,6 +142,14 @@ func postgresCommand() *cli.Command {
 					return postgres.Stop(ctx, pgDir)
 				},
 			},
+			{
+				Name:  "remove",
+				Usage: "Stop and remove the postgres instance.",
+				Flags: []cli.Flag{pgDirFlag},
+				Action: func(ctx context.Context, _ *cli.Command) error {
+					return postgres.Remove(ctx, pgDir)
+				},
+			},
 		},
 	}
 }
