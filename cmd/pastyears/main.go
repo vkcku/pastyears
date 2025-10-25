@@ -169,7 +169,7 @@ func lintCommand() *cli.Command {
 						// comes up as permission denied since the files are
 						// moved
 						// to the nix store before running the linting.
-						args = append(args, "--fix", "--fast-only")
+						args = append(args, "--fix")
 					}
 
 					args = append(args, "./...")
