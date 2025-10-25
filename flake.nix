@@ -57,7 +57,7 @@
           '';
 
           # vendorHash = lib.fakeHash;
-          vendorHash = "sha256-uPqabZgQGQulf+F3BvMLhv4O0h5jOq12F7K60u5xjtA=";
+          vendorHash = "sha256-JpkT7S+zhw46QHuMXXtPGmYAr+oFE3Jst26biVossEA=";
         };
       };
 
