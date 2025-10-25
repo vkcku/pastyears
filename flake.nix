@@ -84,7 +84,8 @@
         build = self.packages."${system}".default;
         build-cli = self.packages."${system}".cli;
         lint = self.packages."${system}".default.overrideAttrs (old: {
-          nativeBuildInputs = old.nativeBuildInputs ++ buildInputs.formatters;
+          nativeBuildInputs =
+            old.nativeBuildInputs ++ buildInputs.formatters ++ [ self.packages.${system}.cli ];
           buildPhase = ''
             # `golangci-lint` and `go` creates some cache directories using
             # `os.UserCacheDir` which takes the value from `$XDG_CACHE_HOME` or
@@ -95,9 +96,7 @@
             # REFERENCE: https://github.com/NixOS/nixpkgs/issues/202614
             # More specifically, this comment:
             # https://github.com/NixOS/nixpkgs/issues/202614#issuecomment-1326152971
-            XDG_CACHE_HOME=$TMPDIR treefmt \
-              --ci \
-              --walk filesystem \
+            XDG_CACHE_HOME=$TMPDIR "${self.packages.${system}.cli}/bin/pastyears" lint
           '';
           doCheck = false;
           installPhase = ''
