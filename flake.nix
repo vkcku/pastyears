@@ -90,8 +90,6 @@
       };
 
       checks."${system}" = {
-        build = self.packages."${system}".default;
-        build-cli = self.packages."${system}".cli;
         lint = self.packages."${system}".default.overrideAttrs (old: {
           nativeBuildInputs =
             old.nativeBuildInputs ++ buildInputs.formatters ++ [ self.packages.${system}.cli ];
