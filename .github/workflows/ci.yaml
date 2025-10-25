@@ -1,4 +1,8 @@
-on: [push, pull_request_target, workflow_dispatch]
+on:
+  push:
+    branches:
+      - main
+  pull_request_target:
 
 permissions: read-all
 
