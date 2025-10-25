@@ -18,6 +18,10 @@ import (
 )
 
 func main() {
+	os.Exit(run())
+}
+
+func run() int {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
@@ -33,8 +37,11 @@ func main() {
 	err := cmd.Run(ctx, os.Args)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
-		os.Exit(1)
+
+		return 1
 	}
+
+	return 0
 }
 
 type missingValueError struct {
