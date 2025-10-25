@@ -40,26 +40,39 @@
       };
     in
     {
-      packages."${system}" = {
-        default = pkgs.buildGoModule {
-          name = "pastyears-webserver";
-          src = ./.;
-          subPackages = [ "cmd/webserver" ];
-
-          # `buildGoModule` will only run the tests for the package being built. That
-          # is, it effectively does `go test cmd/webserver` which means not all
-          # the tests are ran. So instead, override the default `checkPhase` to run
-          # all the tests across the entire project.
-          #
-          # REFERENCE: https://github.com/NixOS/nixpkgs/blob/39231460a6f5e193a193a44902877c1c0026f271/pkgs/build-support/go/module.nix#L313
-          checkPhase = ''
-            go test ./...
-          '';
-
+      packages."${system}" =
+        let
           # vendorHash = lib.fakeHash;
           vendorHash = "sha256-JpkT7S+zhw46QHuMXXtPGmYAr+oFE3Jst26biVossEA=";
+        in
+        {
+          default = pkgs.buildGoModule {
+            name = "pastyears-webserver";
+            src = ./.;
+            subPackages = [ "cmd/webserver" ];
+
+            # `buildGoModule` will only run the tests for the package being built. That
+            # is, it effectively does `go test cmd/webserver` which means not all
+            # the tests are ran. So instead, override the default `checkPhase` to run
+            # all the tests across the entire project.
+            #
+            # REFERENCE: https://github.com/NixOS/nixpkgs/blob/39231460a6f5e193a193a44902877c1c0026f271/pkgs/build-support/go/module.nix#L313
+            checkPhase = ''
+              go test ./...
+            '';
+
+            inherit vendorHash;
+          };
+
+          cli = pkgs.buildGoModule {
+            name = "pastyears";
+            src = ./.;
+            subPackages = [ "cmd/pastyears" ];
+            doCheck = false;
+
+            inherit vendorHash;
+          };
         };
-      };
 
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = lib.lists.flatten (builtins.attrValues buildInputs);
@@ -67,6 +80,7 @@
 
       checks."${system}" = {
         build = self.packages."${system}".default;
+        build-cli = self.packages."${system}".cli;
         lint = self.packages."${system}".default.overrideAttrs (old: {
           nativeBuildInputs = old.nativeBuildInputs ++ buildInputs.formatters;
           buildPhase = ''
