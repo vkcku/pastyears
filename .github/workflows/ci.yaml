@@ -7,7 +7,7 @@ on:
 permissions: read-all
 
 jobs:
-  ci:
+  lint:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5      
@@ -23,5 +23,41 @@ jobs:
           gc-max-store-size: 2G
           # Purge the caches that were last accessed 2 days ago.
           purge-last-accessed: 172800
-      - name: Run checks
-        run: nix flake check
+      - name: Lint
+        run: nix build ".#checks.$(nix eval --impure --raw --expr 'builtins.currentSystem').lint"
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5      
+      - uses: nixbuild/nix-quick-install-action@v30
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          gc-max-store-size: 2G
+          # Purge the caches that were last accessed 2 days ago.
+          purge-last-accessed: 172800
+      - name: Test
+        run: nix build ".#checks.$(nix eval --impure --raw --expr 'builtins.currentSystem').test"
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5      
+      - uses: nixbuild/nix-quick-install-action@v30
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          gc-max-store-size: 2G
+          # Purge the caches that were last accessed 2 days ago.
+          purge-last-accessed: 172800
+      - name: Lint
+        run: nix build .
