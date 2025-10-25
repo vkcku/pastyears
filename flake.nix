@@ -45,6 +45,17 @@
           name = "pastyears-webserver";
           src = ./.;
           subPackages = [ "cmd/webserver" ];
+
+          # `buildGoModule` will only run the tests for the package being built. That
+          # is, it effectively does `go test cmd/webserver` which means not all
+          # the tests are ran. So instead, override the default `checkPhase` to run
+          # all the tests across the entire project.
+          #
+          # REFERENCE: https://github.com/NixOS/nixpkgs/blob/39231460a6f5e193a193a44902877c1c0026f271/pkgs/build-support/go/module.nix#L313
+          checkPhase = ''
+            go test ./...
+          '';
+
           # vendorHash = lib.fakeHash;
           vendorHash = "sha256-uPqabZgQGQulf+F3BvMLhv4O0h5jOq12F7K60u5xjtA=";
         };
