@@ -81,6 +81,12 @@
         buildInputs = lib.lists.flatten (builtins.attrValues buildInputs) ++ [
           self.packages."${system}".cli
         ];
+
+        shellHook = ''
+          export PGHOST="$TMPDIR/pastyears/pg"
+          export PGDATABASE="pastyears"
+          export PGPORT=5432
+        '';
       };
 
       checks."${system}" = {
