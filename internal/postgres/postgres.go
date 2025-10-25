@@ -147,6 +147,21 @@ func Stop(ctx context.Context, pgDir string) error {
 	return nil
 }
 
+// Remove stops and removes the postgres instance.
+func Remove(ctx context.Context, pgDir string) error {
+	err := Stop(ctx, pgDir)
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll(pgDir)
+	if err != nil {
+		return fmt.Errorf("postgres: failed to remove pgDir: %w", err)
+	}
+
+	return nil
+}
+
 // Start starts the postgres instance if it is not running. This will not create
 // the instance if one does not exist.
 func Start(ctx context.Context, pgDir string) error {
