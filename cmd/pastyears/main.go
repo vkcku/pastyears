@@ -38,26 +38,32 @@ func lintCommand() *cli.Command {
 				Name:  "go",
 				Usage: "Lint all go files.",
 				Action: func(ctx context.Context, _ *cli.Command) error {
-					cmd := exec.CommandContext(
+					cmd := newCommand(
 						ctx,
 						"golangci-lint",
 						"run",
 						"--fix",
 						"./...",
 					)
-					cmd.Stdout = os.Stdout
-					cmd.Stderr = os.Stderr
 
 					return cmd.Run()
 				},
 			},
 		},
 		Action: func(ctx context.Context, _ *cli.Command) error {
-			cmd := exec.CommandContext(ctx, "treefmt")
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
+			cmd := newCommand(ctx, "treefmt")
 
 			return cmd.Run()
 		},
 	}
+}
+
+// newCommand returns a command with stdout and stderr set to `os.Stdout` and
+// `os.Stderr`.
+func newCommand(ctx context.Context, command string, args ...string) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, command, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd
 }
