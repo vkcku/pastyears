@@ -12,10 +12,19 @@ import (
 	"path/filepath"
 )
 
+type PostgresStatus uint8
+
+const (
+	Running PostgresStatus = iota
+	NotRunning
+	NoInstance
+)
+
 var (
 	errEmptyPgDir    = errors.New("postgres: pgDir was empty")
 	errNoPort        = errors.New("postgres: port was 0")
 	errEmptyDatabase = errors.New("postgres: database was empty")
+	errNoInstance    = errors.New("postgres: no instance found")
 )
 
 // New will create a new Postgres instance in the given directory that listens
@@ -111,6 +120,101 @@ func New(
 	}
 
 	return nil
+}
+
+// Stop the postgres instance if it is running.
+func Stop(ctx context.Context, pgDir string) error {
+	status, err := Status(ctx, pgDir)
+	if err != nil {
+		return err
+	}
+
+	if status != Running {
+		return nil
+	}
+
+	cmd := exec.CommandContext(
+		ctx,
+		"pg_ctl",
+		"--pgdata",
+		getDataDir(pgDir),
+		"stop",
+	)
+	if _, err = cmd.Output(); err != nil {
+		return wrapExitError("pg_ctl", err)
+	}
+
+	return nil
+}
+
+// Start starts the postgres instance if it is not running. This will not create
+// the instance if one does not exist.
+func Start(ctx context.Context, pgDir string) error {
+	status, err := Status(ctx, pgDir)
+	if err != nil {
+		return err
+	}
+
+	switch status {
+	case Running:
+		return nil
+	case NoInstance:
+		return errNoInstance
+	}
+
+	var (
+		dataDir   = getDataDir(pgDir)
+		socketDir = pgDir
+		logFile   = filepath.Join(pgDir, "logs.log")
+	)
+
+	cmd := exec.CommandContext(
+		ctx,
+		"pg_ctl",
+		"--pgdata",
+		dataDir,
+		"--options",
+		fmt.Sprintf("'--unix_socket_directories=%s'", socketDir),
+		"--log",
+		logFile,
+		"start",
+	)
+	if _, err = cmd.Output(); err != nil {
+		return wrapExitError("pg_ctl", err)
+	}
+
+	return nil
+}
+
+// Status returns the status of the postgres instance.
+func Status(ctx context.Context, pgDir string) (PostgresStatus, error) {
+	var (
+		dataDir = getDataDir(pgDir)
+		cmd     = exec.CommandContext(
+			ctx,
+			"pg_ctl",
+			"--pgdata",
+			dataDir,
+			"status",
+		)
+	)
+
+	_, err := cmd.Output()
+	if err != nil {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			switch exitErr.ExitCode() {
+			case 3:
+				return NotRunning, nil
+			case 4:
+				return NoInstance, nil
+			}
+		}
+
+		return NotRunning, wrapExitError("pg_ctl", err)
+	}
+
+	return Running, nil
 }
 
 func wrapExitError(command string, err error) error {
