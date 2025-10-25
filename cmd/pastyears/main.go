@@ -37,11 +37,11 @@ func main() {
 	}
 }
 
-type errMissingValue struct {
+type missingValueError struct {
 	field string
 }
 
-func (e errMissingValue) Error() string {
+func (e missingValueError) Error() string {
 	return e.field + " not set"
 }
 
@@ -59,7 +59,7 @@ func postgresCommand() *cli.Command {
 			Destination: &pgDir,
 			Validator: func(s string) error {
 				if s == "" {
-					return errMissingValue{"pgdir"}
+					return missingValueError{"pgdir"}
 				}
 
 				return nil
@@ -85,7 +85,7 @@ func postgresCommand() *cli.Command {
 						Destination: &database,
 						Validator: func(s string) error {
 							if s == "" {
-								return errMissingValue{"database"}
+								return missingValueError{"database"}
 							}
 
 							return nil
@@ -99,7 +99,7 @@ func postgresCommand() *cli.Command {
 						Destination: &port,
 						Validator: func(u uint16) error {
 							if u == 0 {
-								return errMissingValue{"port"}
+								return missingValueError{"port"}
 							}
 
 							return nil
