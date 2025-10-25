@@ -1,14 +1,16 @@
 // A CLI for managing Pastyears because shell scripts suck.
 //
-//nolint:exhaustruct
+//nolint:exhaustruct,wrapcheck
 package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"os/signal"
+	"strings"
 
 	"github.com/urfave/cli/v3"
 )
@@ -19,7 +21,7 @@ func main() {
 
 	cmd := &cli.Command{
 		Usage:    "A CLI for managing Pastyears because shell scripts suck.",
-		Commands: []*cli.Command{lintCommand()},
+		Commands: []*cli.Command{lintCommand(), preCommitCommand()},
 	}
 
 	err := cmd.Run(ctx, os.Args)
@@ -54,6 +56,67 @@ func lintCommand() *cli.Command {
 			cmd := newCommand(ctx, "treefmt")
 
 			return cmd.Run()
+		},
+	}
+}
+
+func preCommitCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "pre-commit",
+		Usage: "Run all pre-commit hooks.",
+		Action: func(ctx context.Context, _ *cli.Command) (err error) {
+			stashed := false
+
+			defer func() {
+				if stashed == false {
+					return
+				}
+
+				cmd := newCommand(ctx, "git", "stash", "pop", "--quiet")
+				err = errors.Join(err, cmd.Run())
+			}()
+
+			cmd := newCommand(
+				ctx,
+				"git",
+				"stash",
+				"--quiet",
+				"--keep-index",
+				"--include-untracked",
+			)
+			if err = cmd.Run(); err != nil {
+				return err
+			}
+
+			stashed = true
+
+			changedFilesRaw := strings.Builder{}
+			cmd = newCommand(
+				ctx,
+				"git",
+				"diff",
+				"--diff-filter",
+				"d",
+				"--name-only",
+				"--cached",
+			)
+
+			cmd.Stdout = &changedFilesRaw
+			if err = cmd.Run(); err != nil {
+				return err
+			}
+
+			args := []string{"--ci"}
+			args = append(
+				args,
+				strings.Split(changedFilesRaw.String(), "\n")...)
+
+			cmd = newCommand(ctx, "treefmt", args...)
+			if err = cmd.Run(); err != nil {
+				return err
+			}
+
+			return err
 		},
 	}
 }
