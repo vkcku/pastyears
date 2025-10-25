@@ -50,6 +50,20 @@ func postgresCommand() *cli.Command {
 		database string
 		pgDir    string
 		port     uint16
+
+		pgDirFlag = &cli.StringFlag{
+			Name:        "pgdir",
+			Usage:       "The directory to store all the postgres related files.",
+			Sources:     cli.EnvVars("PGHOST"),
+			Destination: &pgDir,
+			Validator: func(s string) error {
+				if s == "" {
+					return errMissingValue{"pgdir"}
+				}
+
+				return nil
+			},
+		}
 	)
 
 	return &cli.Command{
@@ -61,19 +75,7 @@ func postgresCommand() *cli.Command {
 				Name:  "new",
 				Usage: "Create a new Postgres instance.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:        "pgdir",
-						Usage:       "The directory to store all the postgres related files.",
-						Sources:     cli.EnvVars("PGHOST"),
-						Destination: &pgDir,
-						Validator: func(s string) error {
-							if s == "" {
-								return errMissingValue{"pgdir"}
-							}
-
-							return nil
-						},
-					},
+					pgDirFlag,
 					&cli.StringFlag{
 						Name:        "database",
 						Usage:       "The database to create.",
@@ -105,6 +107,22 @@ func postgresCommand() *cli.Command {
 				},
 				Action: func(ctx context.Context, _ *cli.Command) error {
 					return postgres.New(ctx, pgDir, port, database)
+				},
+			},
+			{
+				Name:  "start",
+				Usage: "Start the postgres instance if it is not running.",
+				Flags: []cli.Flag{pgDirFlag},
+				Action: func(ctx context.Context, _ *cli.Command) error {
+					return postgres.Start(ctx, pgDir)
+				},
+			},
+			{
+				Name:  "stop",
+				Usage: "Stop the postgres instance if it is running.",
+				Flags: []cli.Flag{pgDirFlag},
+				Action: func(ctx context.Context, _ *cli.Command) error {
+					return postgres.Stop(ctx, pgDir)
 				},
 			},
 		},
