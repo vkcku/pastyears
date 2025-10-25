@@ -23,6 +23,7 @@ linters:
     # keep-sorted start
     - depguard
     - mnd
+    - noinlineerr
     - wsl
     # keep-sorted end
   settings:

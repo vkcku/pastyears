@@ -1,7 +1,6 @@
 allow-missing-formatter = false
 on-unmatched = "fatal"
 verbose = 0
-walk = "git"
 excludes = [
   # keep-sorted start
   "flake.lock",
@@ -25,8 +24,8 @@ includes = ["*"]
 priority = -1
 
 [formatter.go-fmt]
-command = "sh"
-options = ["./scripts/golangci-lint.sh"]
+command = "pastyears"
+options = ["lint", "go"]
 includes = ["*.go"]
 
 [formatter.md-fmt]
