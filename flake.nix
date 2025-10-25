@@ -75,7 +75,9 @@
         };
 
       devShells.${system}.default = pkgs.mkShell {
-        buildInputs = lib.lists.flatten (builtins.attrValues buildInputs);
+        buildInputs = lib.lists.flatten (builtins.attrValues buildInputs) ++ [
+          self.packages."${system}".cli
+        ];
       };
 
       checks."${system}" = {
