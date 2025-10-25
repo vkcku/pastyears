@@ -47,9 +47,10 @@ func (e errMissingValue) Error() string {
 
 func postgresCommand() *cli.Command {
 	var (
-		database string
-		pgDir    string
-		port     uint16
+		createInstance bool
+		pgDir          string
+		port           uint16 = 5432
+		database              = "pastyears"
 
 		pgDirFlag = &cli.StringFlag{
 			Name:        "pgdir",
@@ -112,8 +113,24 @@ func postgresCommand() *cli.Command {
 			{
 				Name:  "start",
 				Usage: "Start the postgres instance if it is not running.",
-				Flags: []cli.Flag{pgDirFlag},
+				Flags: []cli.Flag{pgDirFlag, &cli.BoolFlag{
+					Name:        "create",
+					Usage:       "Create the instance if one does not already exist. This will use the defaults from `postgres new`.",
+					Value:       true,
+					Destination: &createInstance,
+				}},
 				Action: func(ctx context.Context, _ *cli.Command) error {
+					if createInstance {
+						status, err := postgres.Status(ctx, pgDir)
+						if err != nil {
+							return err
+						}
+
+						if status == postgres.NoInstance {
+							return postgres.New(ctx, pgDir, port, database)
+						}
+					}
+
 					return postgres.Start(ctx, pgDir)
 				},
 			},
