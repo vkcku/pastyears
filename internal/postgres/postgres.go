@@ -14,12 +14,12 @@ import (
 	"path/filepath"
 )
 
-// PostgresStatus specifies the status of the postgres instance.
-type PostgresStatus uint8
+// Status specifies the status of the postgres instance.
+type Status uint8
 
 const (
 	// Running means the Postgres instance is running.
-	Running PostgresStatus = iota
+	Running Status = iota
 
 	// NotRunning means a Postgres instance exists, but it is not running.
 	NotRunning
@@ -212,7 +212,7 @@ func Start(ctx context.Context, pgDir string) error {
 }
 
 // GetStatus returns the status of the postgres instance.
-func GetStatus(ctx context.Context, pgDir string) (PostgresStatus, error) {
+func GetStatus(ctx context.Context, pgDir string) (Status, error) {
 	var (
 		dataDir = getDataDir(pgDir)
 		cmd     = exec.CommandContext(
