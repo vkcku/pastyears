@@ -40,13 +40,18 @@ func lintCommand() *cli.Command {
 				Name:  "go",
 				Usage: "Lint all go files.",
 				Action: func(ctx context.Context, _ *cli.Command) error {
-					cmd := newCommand(
-						ctx,
-						"golangci-lint",
-						"run",
-						"--fix",
-						"./...",
-					)
+					args := []string{"run"}
+					if isInCI() == false {
+						// Running `--fix` in CI is not great, because the error
+						// comes up as permission denied since the files are
+						// moved
+						// to the nix store before running the linting.
+						args = append(args, "--fix", "--fast-only")
+					}
+
+					args = append(args, "./...")
+
+					cmd := newCommand(ctx, "golangci-lint", args...)
 
 					return cmd.Run()
 				},
@@ -119,6 +124,12 @@ func preCommitCommand() *cli.Command {
 			return err
 		},
 	}
+}
+
+func isInCI() bool {
+	_, ok := os.LookupEnv("CI")
+
+	return ok
 }
 
 // newCommand returns a command with stdout and stderr set to `os.Stdout` and

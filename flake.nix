@@ -103,6 +103,9 @@
             touch $out
           '';
           fixupPhase = '''';
+          env = old.env // {
+            CI = 1;
+          };
         });
       };
     };
