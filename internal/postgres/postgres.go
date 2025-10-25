@@ -132,7 +132,7 @@ func New(
 
 // Stop the postgres instance if it is running.
 func Stop(ctx context.Context, pgDir string) error {
-	status, err := Status(ctx, pgDir)
+	status, err := GetStatus(ctx, pgDir)
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func Remove(ctx context.Context, pgDir string) error {
 // Start starts the postgres instance if it is not running. This will not create
 // the instance if one does not exist.
 func Start(ctx context.Context, pgDir string) error {
-	status, err := Status(ctx, pgDir)
+	status, err := GetStatus(ctx, pgDir)
 	if err != nil {
 		return err
 	}
@@ -211,8 +211,8 @@ func Start(ctx context.Context, pgDir string) error {
 	return nil
 }
 
-// Status returns the status of the postgres instance.
-func Status(ctx context.Context, pgDir string) (PostgresStatus, error) {
+// GetStatus returns the status of the postgres instance.
+func GetStatus(ctx context.Context, pgDir string) (PostgresStatus, error) {
 	var (
 		dataDir = getDataDir(pgDir)
 		cmd     = exec.CommandContext(

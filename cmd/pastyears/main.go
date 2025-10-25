@@ -121,7 +121,7 @@ func postgresCommand() *cli.Command {
 				}},
 				Action: func(ctx context.Context, _ *cli.Command) error {
 					if createInstance {
-						status, err := postgres.Status(ctx, pgDir)
+						status, err := postgres.GetStatus(ctx, pgDir)
 						if err != nil {
 							return err
 						}
