@@ -46,7 +46,7 @@
       packages."${system}" =
         let
           # vendorHash = lib.fakeHash;
-          vendorHash = "sha256-JpkT7S+zhw46QHuMXXtPGmYAr+oFE3Jst26biVossEA=";
+          vendorHash = "sha256-Bwv/TTpr/oTj3ufNugb/pNeYH4rXEyAqAPEQNtBuA20=";
         in
         {
           default = pkgs.buildGoModule {
