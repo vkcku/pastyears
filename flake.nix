@@ -14,7 +14,10 @@
 
       buildInputs = {
         # keep-sorted start block=yes newline_separated=yes
-        core = with pkgs; [ go ];
+        core = with pkgs; [
+          go
+          postgresql_18
+        ];
 
         formatters = with pkgs; [
           # keep-sorted start
@@ -78,6 +81,12 @@
         buildInputs = lib.lists.flatten (builtins.attrValues buildInputs) ++ [
           self.packages."${system}".cli
         ];
+
+        shellHook = ''
+          export PGHOST="$TMPDIR/pastyears/pg"
+          export PGDATABASE="pastyears"
+          export PGPORT=5432
+        '';
       };
 
       checks."${system}" = {
