@@ -24,13 +24,18 @@
           taplo
           treefmt
           typos
+          yamlfmt
           # keep-sorted end
+        ];
+
+        misc = with pkgs; [
+          yaml-language-server
         ];
       };
     in
     {
       devShells."${system}".default = pkgs.mkShell {
-        buildInputs = buildInputs.linters;
+        buildInputs = nixpkgs.lib.flatten (builtins.attrValues buildInputs);
       };
 
       checks."${system}" = {
