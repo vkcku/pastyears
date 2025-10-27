@@ -24,6 +24,7 @@
           taplo
           treefmt
           typos
+          yamlfmt
           # keep-sorted end
         ];
 
