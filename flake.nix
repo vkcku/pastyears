@@ -10,10 +10,11 @@
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages."${system}";
-    in
-    {
-      devShells."${system}".default = pkgs.mkShell {
-        buildInputs = with pkgs; [
+
+      buildInputs = {
+
+        # All the dependencies required for the `lint` check.
+        linters = with pkgs; [
           # Formatters/linters.
           # keep-sorted start
           keep-sorted
@@ -25,6 +26,26 @@
           typos
           # keep-sorted end
         ];
+      };
+    in
+    {
+      devShells."${system}".default = pkgs.mkShell {
+        buildInputs = buildInputs.linters;
+      };
+
+      checks."${system}" = {
+        lint =
+          pkgs.runCommandLocal "lint"
+            {
+              nativeBuildInputs = buildInputs.linters;
+              src = ./.;
+            }
+            ''
+              # If `XDG_CACHE_HOME` is not set, then `$HOME/.cache` is used which is
+              # not writable in checks.
+              XDG_CACHE_HOME="$TMPDIR" treefmt --ci --working-dir "$src"
+              touch "$out"
+            '';
       };
     };
 }
