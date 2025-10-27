@@ -1,0 +1,34 @@
+allow-missing-formatter = false
+on-unmatched = "fatal"
+verbose = 0
+excludes = [
+  # keep-sorted start
+  "flake.lock",
+  # keep-sorted end
+]
+
+[formatter.all-typos]
+command = "typos"
+options = ["--write-changes"]
+includes = ["*"]
+priority = -2
+
+[formatter.all-keep-sorted]
+command = "keep-sorted"
+includes = ["*"]
+priority = -1
+
+[formatter.md-fmt]
+command = "mdformat"
+options = ["--number", "--wrap", "80"]
+includes = ["*.md"]
+
+[formatter.nix-fmt]
+command = "nixfmt"
+options = ["--verify"]
+includes = ["*.nix"]
+
+[formatter.toml-fmt]
+command = "taplo"
+options = ["format"]
+includes = ["*.toml"]
