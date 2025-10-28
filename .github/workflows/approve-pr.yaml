@@ -1,0 +1,24 @@
+---
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  approve-pr:
+    name: "Approve PR"
+    runs-on: ubuntu-24.04
+    if: ${{ github.event.issue.pull_request && github.event.issue.author.login == github.event.issue.repository.owner.login }}
+    env:
+      PR_COMMENT: "${{ github.event.issue.bodyText }}"
+      PR_NUMBER: "${{ github.event.issue.number }}"
+    steps:
+      - run: |-
+          set -eu
+
+          allowed_comments=("LGTM" "LGTM." "Approve" "Approve.")
+          for comment in "${allowed_comments[@]}"
+          do
+            if [ "$comment" == "$PR_COMMENT" ]; then
+              gh pr review "$PR_NUMBER" --approve
+            fi
+          done
