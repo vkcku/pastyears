@@ -12,11 +12,13 @@
       pkgs = nixpkgs.legacyPackages."${system}";
 
       buildInputs = {
+        core = with pkgs; [ go ];
 
         # All the dependencies required for the `lint` check.
         linters = with pkgs; [
           # Formatters/linters.
           # keep-sorted start
+          golangci-lint
           keep-sorted
           nixfmt-rfc-style
           python313Packages.mdformat
@@ -29,7 +31,10 @@
         ];
 
         misc = with pkgs; [
+          # keep-sorted start
+          gopls
           yaml-language-server
+          # keep-sorted end
         ];
       };
     in
@@ -38,11 +43,25 @@
         buildInputs = nixpkgs.lib.flatten (builtins.attrValues buildInputs);
       };
 
+      packages."${system}" = rec {
+        default = webserver;
+
+        webserver = pkgs.buildGoModule {
+          name = "pastyears-webserver";
+          src = ./.;
+          subPackages = [ "cmd/webserver" ];
+          doCheck = false;
+          vendorHash = null;
+        };
+      };
+
       checks."${system}" = {
         lint =
           pkgs.runCommandLocal "lint"
             {
-              nativeBuildInputs = buildInputs.linters;
+              nativeBuildInputs = buildInputs.linters ++ [
+                pkgs.go # needed by `golangci-lint`
+              ];
               src = ./.;
             }
             ''
@@ -50,6 +69,18 @@
               # not writable in checks.
               XDG_CACHE_HOME="$TMPDIR" treefmt --ci --working-dir "$src"
               touch "$out"
+            '';
+
+        test =
+          pkgs.runCommandLocal "test"
+            {
+              nativeBuildInputs = [ pkgs.go ];
+              src = ./.;
+            }
+            ''
+              cd "$src"
+              XDG_CACHE_HOME="$TMPDIR" go test ./...
+              touch  "$out"
             '';
       };
     };

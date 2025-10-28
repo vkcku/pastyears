@@ -1,0 +1,38 @@
+---
+version: "2"
+
+formatters:
+  enable:
+    - goimports
+    - golines
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/vkcku/pastyears
+    golines:
+      # keep-sorted start
+      chain-split-dots: true
+      max-len: 80
+      reformat-tags: true
+      shorten-comments: true
+      tab-len: 4
+      # keep-sorted end
+
+linters:
+  default: all
+  disable:
+    # keep-sorted start
+    - depguard
+    - funlen
+    - mnd
+    - noinlineerr
+    - wsl
+    # keep-sorted end
+
+  settings:
+    staticcheck:
+      checks:
+        - "all"
+        # Allow comparisons against boolean constants.
+        # `condition == false` is far more readable than `if !condition`.
+        - "-S1002"

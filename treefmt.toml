@@ -4,6 +4,8 @@ verbose = 0
 excludes = [
   # keep-sorted start
   "flake.lock",
+  "go.mod",
+  "go.sum",
   # keep-sorted end
 ]
 
@@ -17,6 +19,13 @@ priority = -2
 command = "keep-sorted"
 includes = ["*"]
 priority = -1
+
+[formatter.go-fmt]
+# `golangci-lint` does not play well with linting/formatting only specific files so
+# just run it over the entire project whenever a go file changes.
+command = "bash"
+options = ["-euo", "pipefail", "-c", "golangci-lint run --fix ./..."]
+includes = ["*.go"]
 
 [formatter.md-fmt]
 command = "mdformat"
