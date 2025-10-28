@@ -12,13 +12,23 @@ jobs:
       PR_COMMENT: "${{ github.event.issue.bodyText }}"
       PR_NUMBER: "${{ github.event.issue.number }}"
     steps:
-      - run: |-
+      - name: "Check if comment is approval comment."
+        run: |-
           set -eu
+
+          if [ -z "$PR_COMMENT" ]; then
+            echo "info: PR_COMMENT is empty; skipping"
+
+            exit 0
+          fi
 
           allowed_comments=("LGTM" "LGTM." "Approve" "Approve.")
           for comment in "${allowed_comments[@]}"
           do
             if [ "$comment" == "$PR_COMMENT" ]; then
+              echo "info: found approval comment: $PR_COMMENT"
               gh pr review "$PR_NUMBER" --approve
+
+              exit 0
             fi
           done
