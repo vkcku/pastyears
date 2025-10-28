@@ -7,7 +7,7 @@ jobs:
   approve-pr:
     name: "Approve PR"
     runs-on: ubuntu-24.04
-    if: ${{ github.event.issue.pull_request && github.event.comment.author_association == "OWNER" }}
+    if: ${{ github.event.issue.pull_request && github.event.comment.author_association == 'OWNER' }}
     env:
       PR_COMMENT: "${{ github.event.comment.body }}"
       PR_NUMBER: "${{ github.event.issue.number }}"
