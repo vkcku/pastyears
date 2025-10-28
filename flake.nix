@@ -42,6 +42,18 @@
         buildInputs = nixpkgs.lib.flatten (builtins.attrValues buildInputs);
       };
 
+      packages."${system}" = rec {
+        default = webserver;
+
+        webserver = pkgs.buildGoModule {
+          name = "pastyears-webserver";
+          src = ./.;
+          subPackages = [ "cmd/webserver" ];
+          doCheck = false;
+          vendorHash = null;
+        };
+      };
+
       checks."${system}" = {
         lint =
           pkgs.runCommandLocal "lint"
