@@ -70,6 +70,18 @@
               XDG_CACHE_HOME="$TMPDIR" treefmt --ci --working-dir "$src"
               touch "$out"
             '';
+
+        test =
+          pkgs.runCommandLocal "test"
+            {
+              nativeBuildInputs = [ pkgs.go ];
+              src = ./.;
+            }
+            ''
+              cd "$src"
+              XDG_CACHE_HOME="$TMPDIR" go test ./...
+              touch  "$out"
+            '';
       };
     };
 }
