@@ -12,6 +12,7 @@
       pkgs = nixpkgs.legacyPackages."${system}";
 
       buildInputs = {
+        core = with pkgs; [ go ];
 
         # All the dependencies required for the `lint` check.
         linters = with pkgs; [
@@ -29,7 +30,10 @@
         ];
 
         misc = with pkgs; [
+          # keep-sorted start
+          gopls
           yaml-language-server
+          # keep-sorted end
         ];
       };
     in

@@ -4,6 +4,8 @@ verbose = 0
 excludes = [
   # keep-sorted start
   "flake.lock",
+  "go.mod",
+  "go.sum",
   # keep-sorted end
 ]
 
