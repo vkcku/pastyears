@@ -33,3 +33,5 @@ jobs:
               exit 0
             fi
           done
+
+          echo "info: no matching approvaal comment was found"
