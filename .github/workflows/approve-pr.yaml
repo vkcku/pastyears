@@ -7,17 +7,15 @@ jobs:
   approve-pr:
     name: "Approve PR"
     runs-on: ubuntu-24.04
-    if: ${{ github.event.issue.pull_request && github.event.issue.author.login == github.event.issue.repository.owner.login }}
+    if: ${{ github.event.issue.pull_request && github.event.comment.author_association == "OWNER" }}
     env:
-      PR_COMMENT: "${{ github.event.issue.bodyText }}"
+      PR_COMMENT: "${{ github.event.comment.body }}"
       PR_NUMBER: "${{ github.event.issue.number }}"
       FULL_EVENT: "${{ toJson(github.event) }}"
     steps:
       - name: "Check if comment is approval comment."
         run: |-
           set -eu
-
-          echo "$FULL_EVENT" | jq
 
           if [ -z "$PR_COMMENT" ]; then
             echo "info: PR_COMMENT is empty; skipping"
@@ -35,3 +33,5 @@ jobs:
               exit 0
             fi
           done
+
+          echo "info: no matching approvaal comment was found"
