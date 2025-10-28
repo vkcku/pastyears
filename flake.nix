@@ -18,6 +18,7 @@
         linters = with pkgs; [
           # Formatters/linters.
           # keep-sorted start
+          golangci-lint
           keep-sorted
           nixfmt-rfc-style
           python313Packages.mdformat
@@ -58,7 +59,9 @@
         lint =
           pkgs.runCommandLocal "lint"
             {
-              nativeBuildInputs = buildInputs.linters;
+              nativeBuildInputs = buildInputs.linters ++ [
+                pkgs.go # needed by `golangci-lint`
+              ];
               src = ./.;
             }
             ''

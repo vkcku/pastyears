@@ -20,6 +20,13 @@ command = "keep-sorted"
 includes = ["*"]
 priority = -1
 
+[formatter.go-fmt]
+# `golangci-lint` does not play well with linting/formatting only specific files so
+# just run it over the entire project whenever a go file changes.
+command = "bash"
+options = ["-euo", "pipefail", "-c", "golangci-lint run --fix ./..."]
+includes = ["*.go"]
+
 [formatter.md-fmt]
 command = "mdformat"
 options = ["--number", "--wrap", "80"]
