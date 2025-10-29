@@ -26,6 +26,7 @@ linters:
     - funlen
     - mnd
     - noinlineerr
+    - varnamelen
     - wsl
     # keep-sorted end
 

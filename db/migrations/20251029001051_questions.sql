@@ -1,5 +1,5 @@
 -- migrate:up
-select 1;
+select
+  1;
 
 -- migrate:down
-

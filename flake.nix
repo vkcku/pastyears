@@ -30,6 +30,7 @@
           nixfmt-rfc-style
           python313Packages.mdformat
           python313Packages.mdformat-gfm
+          sql-formatter
           taplo
           treefmt
           typos
@@ -50,11 +51,11 @@
         buildInputs = nixpkgs.lib.flatten (builtins.attrValues buildInputs);
 
         shellHook = ''
-            ROOT_DIR="$(git rev-parse --show-toplevel)"
+          ROOT_DIR="$(git rev-parse --show-toplevel)"
 
-            # For dbmate.
-            export DATABASE_URL="sqlite:$ROOT_DIR/data.db"
-          '';
+          # For dbmate.
+          export DATABASE_URL="sqlite:$ROOT_DIR/data.db"
+        '';
       };
 
       packages."${system}" = rec {

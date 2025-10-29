@@ -37,6 +37,12 @@ command = "nixfmt"
 options = ["--verify"]
 includes = ["*.nix"]
 
+[formatter.sql-fmt]
+command = "go"
+options = ["run", "./cmd/sqlformat"]
+includes = ["*.sql"]
+excludes = ["db/schema.sql"]
+
 [formatter.toml-fmt]
 command = "taplo"
 options = ["format"]
