@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -36,18 +37,31 @@ func run(files []string) error {
 		mu   sync.Mutex
 	)
 
+	appendErr := func(err error) {
+		mu.Lock()
+
+		errs = append(errs, err)
+
+		mu.Unlock()
+	}
+
 	for _, file := range files {
 		wg.Go(func() {
+			// `sql-formatter` will always write to the file even if there are
+			// no formatting changes required which means `treefmt` will
+			// interpret that as a failure in CI (also it just won't work
+			// because nix makes the files read-only during the checks). So, do
+			// a little bit of manual checking before writing the formatted file
+			// back to disk.
 			cmd := exec.CommandContext( //nolint:gosec
 				ctx,
 				"sql-formatter",
 				"-l",
 				"sqlite",
-				"--fix",
 				file,
 			)
 
-			_, err := cmd.Output()
+			stdout, err := cmd.Output()
 			if err != nil {
 				var exitErr *exec.ExitError
 				if errors.As(err, &exitErr) {
@@ -59,11 +73,27 @@ func run(files []string) error {
 					)
 				}
 
-				mu.Lock()
+				appendErr(err)
 
-				errs = append(errs, err)
+				return
+			}
 
-				mu.Unlock()
+			actual, err := os.ReadFile(file) //nolint:gosec
+			if err != nil {
+				appendErr(fmt.Errorf("failed to read '%s': %w", file, err))
+
+				return
+			}
+
+			if bytes.Equal(actual, stdout) {
+				return
+			}
+
+			err = os.WriteFile(file, stdout, 0640) //nolint:gosec
+			if err != nil {
+				appendErr(fmt.Errorf("failed to write '%s': %w", file, err))
+
+				return
 			}
 		})
 	}
