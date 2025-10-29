@@ -66,7 +66,8 @@
           src = ./.;
           subPackages = [ "cmd/webserver" ];
           doCheck = false;
-          vendorHash = null;
+          # vendorHash = nixpkgs.lib.fakeHash;
+          vendorHash = "sha256-Swi56SaPh4AN7LZ2a+j3p/jNf/InnbmE6AEErjqLg0g=";
         };
       };
 
