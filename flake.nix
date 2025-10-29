@@ -14,6 +14,13 @@
       buildInputs = {
         core = with pkgs; [ go ];
 
+        dev = with pkgs; [
+          # keep-sorted start
+          dbmate
+          sqlite
+          # keep-sorted end
+        ];
+
         # All the dependencies required for the `lint` check.
         linters = with pkgs; [
           # Formatters/linters.
@@ -23,6 +30,7 @@
           nixfmt-rfc-style
           python313Packages.mdformat
           python313Packages.mdformat-gfm
+          sql-formatter
           taplo
           treefmt
           typos
@@ -41,6 +49,13 @@
     {
       devShells."${system}".default = pkgs.mkShell {
         buildInputs = nixpkgs.lib.flatten (builtins.attrValues buildInputs);
+
+        shellHook = ''
+          ROOT_DIR="$(git rev-parse --show-toplevel)"
+
+          # For dbmate.
+          export DATABASE_URL="sqlite:$ROOT_DIR/data.db"
+        '';
       };
 
       packages."${system}" = rec {
