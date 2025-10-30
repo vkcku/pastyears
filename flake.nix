@@ -81,11 +81,17 @@
           '';
           installPhase = '''';
           fixupPhase = '''';
+          env = {
+            CGO_CFLAGS = "-O1";
+          };
         });
 
         test = self.packages."${system}".webserver.overrideAttrs (old: {
           name = "test";
           nativeBuildInputs = old.nativeBuildInputs ++ buildInputs.linters;
+          env = {
+            CGO_CFLAGS = "-O1";
+          };
           buildPhase = ''
             XDG_CACHE_HOME="$TMPDIR" go test ./...
             touch "$out"
