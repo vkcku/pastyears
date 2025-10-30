@@ -6,7 +6,7 @@
   };
 
   outputs =
-    { nixpkgs, ... }:
+    { self, nixpkgs, ... }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages."${system}";
@@ -66,37 +66,33 @@
           src = ./.;
           subPackages = [ "cmd/webserver" ];
           doCheck = false;
-          vendorHash = null;
+          # vendorHash = nixpkgs.lib.fakeHash;
+          vendorHash = "sha256-Swi56SaPh4AN7LZ2a+j3p/jNf/InnbmE6AEErjqLg0g=";
         };
       };
 
       checks."${system}" = {
-        lint =
-          pkgs.runCommandLocal "lint"
-            {
-              nativeBuildInputs = buildInputs.linters ++ [
-                pkgs.go # needed by `golangci-lint`
-              ];
-              src = ./.;
-            }
-            ''
-              # If `XDG_CACHE_HOME` is not set, then `$HOME/.cache` is used which is
-              # not writable in checks.
-              XDG_CACHE_HOME="$TMPDIR" treefmt --ci --working-dir "$src"
-              touch "$out"
-            '';
+        lint = self.packages."${system}".webserver.overrideAttrs (old: {
+          name = "lint";
+          nativeBuildInputs = old.nativeBuildInputs ++ buildInputs.linters;
+          buildPhase = ''
+            XDG_CACHE_HOME="$TMPDIR" treefmt --ci
+            touch "$out"
+          '';
+          installPhase = '''';
+          fixupPhase = '''';
+        });
 
-        test =
-          pkgs.runCommandLocal "test"
-            {
-              nativeBuildInputs = [ pkgs.go ];
-              src = ./.;
-            }
-            ''
-              cd "$src"
-              XDG_CACHE_HOME="$TMPDIR" go test ./...
-              touch  "$out"
-            '';
+        test = self.packages."${system}".webserver.overrideAttrs (old: {
+          name = "test";
+          nativeBuildInputs = old.nativeBuildInputs ++ buildInputs.linters;
+          buildPhase = ''
+            XDG_CACHE_HOME="$TMPDIR" go test ./...
+            touch "$out"
+          '';
+          installPhase = '''';
+          fixupPhase = '''';
+        });
       };
     };
 }

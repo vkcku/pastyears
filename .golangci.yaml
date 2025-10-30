@@ -24,6 +24,7 @@ linters:
     # keep-sorted start
     - depguard
     - funlen
+    - godox
     - mnd
     - noinlineerr
     - varnamelen

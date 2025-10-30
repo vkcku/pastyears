@@ -6,6 +6,10 @@ excludes = [
   "flake.lock",
   "go.mod",
   "go.sum",
+  # This directory does not actually exist in the source tree, but it will be added
+  # by `nix` during the `lint` check due to how it handles go dependencies in
+  # `buildGoModules`.
+  "vendor/*",
   # keep-sorted end
 ]
 
