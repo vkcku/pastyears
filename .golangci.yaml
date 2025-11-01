@@ -22,6 +22,7 @@ linters:
   default: all
   disable:
     # keep-sorted start
+    - cyclop
     - depguard
     - funlen
     - godox
