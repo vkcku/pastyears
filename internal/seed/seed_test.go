@@ -5,6 +5,7 @@ import (
 	"errors"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/vkcku/pastyears/internal/seed"
 	"github.com/vkcku/pastyears/internal/testutils"
@@ -89,5 +90,35 @@ func TestSeed(t *testing.T) {
 		if value != 1 {
 			t.Errorf("wanted 1, got %+v for table '%s'", value, table)
 		}
+	}
+}
+
+// TestQuestionPaperLatestYear ensures that the seeding includes the current
+// year for the question papers table. This is to ensure that the `CHECK`
+// constraint is updated when the year changes.
+func TestQuestionPaperLatestYear(t *testing.T) {
+	t.Parallel()
+
+	var (
+		value int
+		ctx   = t.Context()
+		db    = testutils.TestDB(t)
+	)
+
+	if err := seed.Seed(ctx, db); err != nil {
+		t.Fatal(err)
+	}
+
+	row := db.QueryRowContext(
+		ctx,
+		"SELECT 1 FROM question_papers WHERE year = ?",
+		time.Now().Year(),
+	)
+	if err := row.Scan(&value); err != nil {
+		t.Fatal(err)
+	}
+
+	if value != 1 {
+		t.Fatalf("wanted 1, got %d", value)
 	}
 }
