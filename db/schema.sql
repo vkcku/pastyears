@@ -35,7 +35,10 @@ CREATE TABLE question_papers (
   year integer not null,
   exam_edition integer not null,
   constraint ck__question_papers__exam_edition__valid check (exam_edition in (0, 1, 2)),
-  constraint ck__question_papers__year__in_range check (year >= 1990 and year <= cast(strftime('%Y', 'now') as integer)),
+  constraint ck__question_papers__year__in_range check (
+    year >= 1990
+    and year <= 2025
+  ),
   constraint uq__question_papers__year__paper_id__exam_edition unique (year, paper_id, exam_edition)
 ) strict;
 CREATE TABLE subjects (
