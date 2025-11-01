@@ -3,8 +3,6 @@ package testutils
 
 import (
 	"os"
-	"path/filepath"
-	"runtime"
 	"sync"
 	"testing"
 
@@ -63,21 +61,9 @@ func getSchema(t *testing.T) string {
 	migrationsLock.Lock()
 	defer migrationsLock.Unlock()
 
-	_, file, _, ok := runtime.Caller(0)
-	if ok == false {
-		t.Fatalf("testutils: failed to get root directory via runtime.Caller")
-	}
+	schemaFile := "../../db/schema.sql"
 
-	// ../../db/schema.sql
-	schemaFile := filepath.Join(
-		filepath.Dir(file),
-		"..",
-		"..",
-		"db",
-		"schema.sql",
-	)
-
-	migrationsRaw, err := os.ReadFile(schemaFile) //nolint:gosec
+	migrationsRaw, err := os.ReadFile(schemaFile)
 	if err != nil {
 		t.Fatalf(
 			"testutils: failed to read migrations file '%s': %+v",
