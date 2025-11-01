@@ -55,10 +55,10 @@
           ROOT_DIR="$(git rev-parse --show-toplevel)"
 
           # For dbmate.
-          export PGHOST="$TMPDIR/pastyears/pg"
+          export PGHOST="/tmp/pastyears/pg"
           export PGPORT=5432
           export PGDATABASE="pastyears"
-          export DATABASE_URL="sqlite:$ROOT_DIR/data.db"
+          export PASTYEARS_DB_URL="postgresql://$USER:@/$PGDATABASE?host=$PGHOST&port=$PGPORT"
         '';
       };
 
