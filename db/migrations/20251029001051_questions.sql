@@ -39,7 +39,7 @@ create table question_papers (
   constraint ck__question_papers__exam_edition__valid check (exam_edition in (0, 1, 2)),
   constraint ck__question_papers__year__in_range check (
     year >= 1990
-    and year <= cast(strftime('%Y', 'now') as integer)
+    and year <= 2025
   ),
   constraint uq__question_papers__year__paper_id__exam_edition unique (year, paper_id, exam_edition)
 ) strict;
