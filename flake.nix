@@ -17,6 +17,7 @@
         dev = with pkgs; [
           # keep-sorted start
           dbmate
+          postgresql_18
           sqlite
           # keep-sorted end
         ];
