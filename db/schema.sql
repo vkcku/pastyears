@@ -1,4 +1,3 @@
-\restrict mqOkx9HFPWU9GRc3TEwETF6k1P5Lbrby8PmYCExBDP7sxHOiFgwM53nVHYIoEdR
 
 -- Dumped from database version 18.0
 -- Dumped by pg_dump version 18.0
@@ -489,7 +488,6 @@ ALTER TABLE ONLY questions.question_papers
 -- PostgreSQL database dump complete
 --
 
-\unrestrict mqOkx9HFPWU9GRc3TEwETF6k1P5Lbrby8PmYCExBDP7sxHOiFgwM53nVHYIoEdR
 
 
 --
