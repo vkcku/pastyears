@@ -58,7 +58,7 @@
           export PGHOST="$TMPDIR/pastyears/pg"
           export PGPORT=5432
           export PGDATABASE="pastyears"
-          export DATABASE_URL="sqlite:$ROOT_DIR/data.db"
+          export DATABASE_URL="postgresql://$USER:@/$PGDATABASE?host=$PGHOST&port=$PGPORT"
         '';
       };
 
