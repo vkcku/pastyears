@@ -76,7 +76,7 @@ select
   0
 from
   generate_years
-union
+union all
 select
   (
     select
