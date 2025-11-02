@@ -109,3 +109,25 @@ func TestDefaults(t *testing.T) {
 		})
 	}
 }
+
+func TestNew2(t *testing.T) {
+	t.Parallel()
+
+	t.Run("empty connection string", func(t *testing.T) {
+		t.Parallel()
+
+		pool, err := database.New2(t.Context(), "")
+
+		if errors.Is(err, database.ErrEmptyConnectionString) == false {
+			t.Errorf(
+				"wanted '%+v', got '+%v'",
+				database.ErrEmptyConnectionString,
+				err,
+			)
+		}
+
+		if pool != nil {
+			t.Error("pool must be nil")
+		}
+	})
+}
