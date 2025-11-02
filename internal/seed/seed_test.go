@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/vkcku/pastyears/internal/seed"
 	"github.com/vkcku/pastyears/internal/testutils"
 )
@@ -15,49 +17,43 @@ func TestSeed(t *testing.T) {
 	t.Parallel()
 
 	var (
+		tables []string
+
 		ctx        = t.Context()
-		db         = testutils.TestDB(t)
-		tables     = make([]string, 0, 10)
+		tx         = testutils.TestTx(t)
 		exceptions = []string{
-			"rich_text",
-			"prelims_questions",
-			"prelims_questions_topics",
+			"questions.rich_text",
+			"questions.prelims_questions",
+			"questions.prelims_questions_topics",
 		}
 	)
 
 	// Fetch the table names.
 	{
-		rows, err := db.QueryContext(
+		rows, err := tx.Query(
 			ctx,
-			"select name from sqlite_schema where type = 'table'",
+			"select schemaname || '.' || tablename from pg_catalog.pg_tables where schemaname not in ('pg_catalog', 'information_schema')", //nolint:lll
 		)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		defer func() {
-			if err := rows.Err(); err != nil {
-				t.Fatal(err)
-			}
+		tables, err = pgx.CollectRows(
+			rows,
+			func(row pgx.CollectableRow) (string, error) {
+				var table string
 
-			if err := rows.Close(); err != nil {
-				t.Fatal(err)
-			}
-		}()
+				err := row.Scan(&table)
 
-		for rows.Next() {
-			var table string
-
-			err := rows.Scan(&table)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			tables = append(tables, table)
+				return table, err //nolint:wrapcheck
+			},
+		)
+		if err != nil {
+			t.Fatal(err)
 		}
 	}
 
-	if err := seed.Seed(ctx, db); err != nil {
+	if err := seed.Seed(ctx, tx); err != nil {
 		t.Fatal(err)
 	}
 
@@ -65,13 +61,13 @@ func TestSeed(t *testing.T) {
 		var (
 			value int
 			query = "SELECT 1 FROM " + table + " LIMIT 1"
-			row   = db.QueryRowContext(ctx, query)
+			row   = tx.QueryRow(ctx, query)
 		)
 
 		err := row.Scan(&value)
 
 		if slices.Contains(exceptions, table) {
-			if errors.Is(err, sql.ErrNoRows) == false {
+			if errors.Is(err, pgx.ErrNoRows) == false {
 				t.Errorf(
 					"wanted '%s', got '%s' for table '%s'",
 					sql.ErrNoRows,
@@ -102,16 +98,17 @@ func TestQuestionPaperLatestYear(t *testing.T) {
 	var (
 		value int
 		ctx   = t.Context()
-		db    = testutils.TestDB(t)
+		tx    = testutils.TestTx(t)
 	)
 
-	if err := seed.Seed(ctx, db); err != nil {
+	err := seed.Seed(ctx, tx)
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	row := db.QueryRowContext(
+	row := tx.QueryRow(
 		ctx,
-		"SELECT 1 FROM question_papers WHERE year = ?",
+		"SELECT 1 FROM questions.question_papers WHERE year = $1",
 		time.Now().Year(),
 	)
 	if err := row.Scan(&value); err != nil {

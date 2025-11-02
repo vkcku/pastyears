@@ -98,7 +98,15 @@ func New(
 		return "", wrapError("createdb", err)
 	}
 
-	return "", nil
+	connstring := fmt.Sprintf(
+		"postgresql://%s:@/%s?host=%s&port=%d",
+		u.Username,
+		database,
+		dir,
+		port,
+	)
+
+	return connstring, nil
 }
 
 // Start starts the Postgres instance. The instance must have been initialized.
