@@ -4,11 +4,17 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/vkcku/pastyears/internal/database"
+	"github.com/vkcku/pastyears/internal/testutils"
 )
+
+func TestMain(m *testing.M) {
+	os.Exit(testutils.Main(m))
+}
 
 func TestNew(t *testing.T) {
 	t.Parallel()
@@ -128,6 +134,32 @@ func TestNew2(t *testing.T) {
 
 		if pool != nil {
 			t.Error("pool must be nil")
+		}
+	})
+
+	t.Run("valid connection string", func(t *testing.T) {
+		t.Parallel()
+
+		var (
+			ctx        = t.Context()
+			connstring = testutils.GetConnString(t)
+		)
+
+		pool, err := database.New2(ctx, connstring)
+
+		t.Cleanup(func() {
+			if pool != nil {
+				pool.Close()
+			}
+		})
+
+		if err != nil {
+			t.Fatalf("got error: %+v", err)
+		}
+
+		err = pool.Ping(ctx)
+		if err != nil {
+			t.Fatalf("ping got error: %+v", err)
 		}
 	})
 }
