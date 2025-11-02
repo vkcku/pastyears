@@ -1,4 +1,3 @@
-//nolint:gochecknoglobals
 package testutils
 
 import (
@@ -10,8 +9,8 @@ import (
 )
 
 var (
-	migrations     string
-	migrationsLock sync.RWMutex
+	migrationsQuery string
+	migrationsLock  sync.RWMutex
 )
 
 // TestDB returns a clean in-memory database for the given test. This will be
@@ -48,8 +47,8 @@ func getSchema(t *testing.T) string {
 
 	migrationsLock.RLock()
 
-	if migrations != "" {
-		m := migrations
+	if migrationsQuery != "" {
+		m := migrationsQuery
 
 		migrationsLock.RUnlock()
 
@@ -72,7 +71,7 @@ func getSchema(t *testing.T) string {
 		)
 	}
 
-	migrations = string(migrationsRaw)
+	migrationsQuery = string(migrationsRaw)
 
-	return migrations
+	return migrationsQuery
 }

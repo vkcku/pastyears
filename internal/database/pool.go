@@ -2,6 +2,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	// Autoimport the sqlite3 driver.
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -49,4 +51,35 @@ func New(file string) (*Database, error) {
 	}
 
 	return db, nil
+}
+
+// Pool is a connection pool that is safe for concurrent use.
+type Pool = pgxpool.Pool
+
+// ErrEmptyConnectionString is returned if the connection string is empty.
+var ErrEmptyConnectionString = errors.New("database: empty connection string")
+
+// New2 returns a new database pool.
+func New2(ctx context.Context, connstring string) (*Pool, error) {
+	// If the connection string is empty `pgx` will use the values from the
+	// postgres
+	// environment variables like `PGPORT` etc. which I am not a fan of.
+	if connstring == "" {
+		return nil, ErrEmptyConnectionString
+	}
+
+	config, err := pgxpool.ParseConfig(connstring)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"database: failed to parse connection string: %w",
+			err,
+		)
+	}
+
+	pool, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		return nil, fmt.Errorf("database: failed to create pool: %w", err)
+	}
+
+	return pool, nil
 }

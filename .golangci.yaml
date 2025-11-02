@@ -32,6 +32,12 @@ linters:
     - wsl
     # keep-sorted end
 
+  exclusions:
+    rules:
+      - path: internal/testutils/
+        linters:
+          - gochecknoglobals
+
   settings:
     staticcheck:
       checks:
