@@ -10,3 +10,13 @@ func init() { //nolint:gochecknoinits
 		panic("testutils: cannot import outside of tests")
 	}
 }
+
+// Main is a common main function that should be called from `TestMain` from
+// all the tests.
+func Main(m *testing.M) int {
+	defer func() {
+		closePool()
+	}()
+
+	return m.Run()
+}

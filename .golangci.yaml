@@ -32,6 +32,12 @@ linters:
     - wsl
     # keep-sorted end
 
+  exclusions:
+    rules:
+      - path: internal/testutils/
+        linters:
+          - gochecknoglobals
+
   settings:
     staticcheck:
       checks:
@@ -39,3 +45,4 @@ linters:
         # Allow comparisons against boolean constants.
         # `condition == false` is far more readable than `if !condition`.
         - "-S1002"
+        - "-ST1003"

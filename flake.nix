@@ -17,6 +17,7 @@
         dev = with pkgs; [
           # keep-sorted start
           dbmate
+          postgresql_18
           sqlite
           # keep-sorted end
         ];
@@ -54,7 +55,10 @@
           ROOT_DIR="$(git rev-parse --show-toplevel)"
 
           # For dbmate.
-          export DATABASE_URL="sqlite:$ROOT_DIR/data.db"
+          export PGHOST="/tmp/pastyears/pg"
+          export PGPORT=5432
+          export PGDATABASE="pastyears"
+          export PASTYEARS_DB_URL="postgresql://$USER:@/$PGDATABASE?host=$PGHOST&port=$PGPORT"
         '';
       };
 

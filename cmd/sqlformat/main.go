@@ -57,7 +57,7 @@ func run(files []string) error {
 				ctx,
 				"sql-formatter",
 				"-l",
-				"sqlite",
+				"postgresql",
 				file,
 			)
 
